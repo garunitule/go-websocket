@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha1"
 	b64 "encoding/base64"
 	"fmt"
@@ -11,7 +12,19 @@ import (
 
 // TODO: implement the rest of the communication
 func handleConnection(conn net.Conn) {
+	fmt.Println("called handleConnection")
+	defer conn.Close()
+	reader := bufio.NewReader(conn)
 
+	for {
+		fmt.Println("called for loop")
+		firstByte, err := reader.ReadByte()
+		fmt.Println("firstByte: ", firstByte)
+		if err != nil {
+			fmt.Println("Error reading from connection:", err)
+			return
+		}
+	}
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +60,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
 		return
 	}
-	defer conn.Close()
 
 	// implement the rest of the handshake
 	key := r.Header.Get("Sec-WebSocket-Key")
@@ -62,11 +74,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Sec-WebSocket-Protocol") != "" {
 		fmt.Fprintf(buf, "Sec-WebSocket-Protocol: %s\r\n", r.Header.Get("Sec-WebSocket-Protocol"))
 	}
-	if r.Header.Get("Sec-WebSocket-Extensions") != "" {
-		fmt.Fprintf(buf, "Sec-WebSocket-Extensions: %s\r\n", r.Header.Get("Sec-WebSocket-Extensions"))
-	}
-	buf.Flush()
+	fmt.Fprintf(buf, "\r\n")
 
+	buf.Flush()
 	go handleConnection(conn)
 }
 

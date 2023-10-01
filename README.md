@@ -21,3 +21,5 @@ curl -vvv -i -N -H "Connection: keep-alive, Upgrade" -H "Upgrade: websocket" -H 
 
 - TODO: WebSocketでメッセージやりとり
 
+## TODO
+- [] Sec-WebSocket-Extensionsヘッダの解析とhandlerへの反映
