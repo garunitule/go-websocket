@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	b64 "encoding/base64"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -15,88 +14,15 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	for {
-		header := make([]byte, 2)
-		_, err := io.ReadFull(conn, header)
+		strPayload, err := readRequestPayload(conn)
 		if err != nil {
 			fmt.Println(err)
-			// TODO: エラーハンドリング
 			return
 		}
-		fmt.Println(header)
-
-		fin := header[0]&0x80 != 0
-		opcode := header[0] & 0x0F
-		masked := header[1]&0x80 != 0
-		length := int(header[1] & 0x7F)
-		fmt.Printf("fin: %t, opcode: %d, masked: %t, length: %d\n", fin, opcode, masked, length)
-
-		if length == 126 || length == 127 {
-			length, err = extraPayloadLength(conn, length)
-			if err != nil {
-				fmt.Println(err)
-				// TODO: エラーハンドリング
-				return
-			}
-		} else if length > 127 {
-			fmt.Println("Invalid payload length. Please check the RFC.")
-			return
-		}
-
-		maskKey := make([]byte, 4)
-		_, err = io.ReadFull(conn, maskKey)
-		if err != nil {
-			fmt.Println(err)
-			// TODO: エラーハンドリング
-			return
-		}
-
-		payload := make([]byte, length)
-		_, err = io.ReadFull(conn, payload)
-		if err != nil {
-			fmt.Println(err)
-			// TODO: エラーハンドリング
-			return
-		}
-
-		// unmask payload using maskKey
-		// TODO: 調査
-		for i := 0; i < length; i++ {
-			payload[i] ^= maskKey[i%4]
-		}
-
-		strPayload := string(payload)
 		fmt.Println(strPayload)
 
 		return
 	}
-}
-
-// 延長ペイロード長を取得する
-func extraPayloadLength(conn net.Conn, payloadLength int) (int, error) {
-	var n int
-	if payloadLength == 126 {
-		n = 2
-	} else if payloadLength == 127 {
-		n = 8
-	} else {
-		return 0, fmt.Errorf("Invalid payload length")
-	}
-
-	extraPayloadLengthBuffer := make([]byte, n)
-	_, err := io.ReadFull(conn, extraPayloadLengthBuffer)
-	if err != nil {
-		fmt.Println(err)
-		// TODO: エラーハンドリング
-		return 0, err
-	}
-
-	length := 0
-	for i := 0; i < n; i++ {
-		t := 8 * (n - i - 1)
-		fmt.Println(extraPayloadLengthBuffer[i], t, int(extraPayloadLengthBuffer[i])<<t)
-		length |= int(extraPayloadLengthBuffer[i]) << t
-	}
-	return length, nil
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
