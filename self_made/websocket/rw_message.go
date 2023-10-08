@@ -59,6 +59,41 @@ func ReadMessage(conn net.Conn) (string, error) {
 	return strPayload, nil
 }
 
+func WriteMessage(conn net.Conn, message string) error {
+	var response []byte
+	response = append(response, 0x81)
+	length := len(message)
+	if length < 126 {
+		response = append(response, byte(length))
+	} else if length < 65536 {
+		response = append(response, 126)
+	} else {
+		response = append(response, 127)
+	}
+
+	if 126 <= length {
+		var n int
+		if length < 65536 {
+			n = 2
+		} else {
+			n = 8
+		}
+		extendedPayloadLength := make([]byte, n)
+		for i := range extendedPayloadLength {
+			extendedPayloadLength[i] = byte(length >> 8 * (n - i - 1))
+		}
+		response = append(response, extendedPayloadLength...)
+	}
+	response = append(response, []byte(message)...)
+	_, err := conn.Write(response)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 // 延長ペイロード長を取得する
 func extraPayloadLength(conn net.Conn, payloadLength int) (int, error) {
 	var n int

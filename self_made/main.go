@@ -12,7 +12,14 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	for {
-		_, err := wb.ReadMessage(conn)
+		message, err := wb.ReadMessage(conn)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(message)
+
+		err = wb.WriteMessage(conn, "received!")
 		if err != nil {
 			fmt.Println(err)
 			return
