@@ -27,21 +27,9 @@ func handleConnection(conn net.Conn) {
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%+v\n", r)
-	if r.Method != http.MethodGet {
-		fmt.Println("Not a GET request")
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	if r.Header.Get("Upgrade") != "websocket" {
-		fmt.Println("Not a websocket request")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if r.Header.Get("Host") != "" && r.Header.Get("Connection") != "" && r.Header.Get("Sec-WebSocket-Key") != "" && r.Header.Get("Sec-WebSocket-Version") != "" {
-		fmt.Println("Missing required headers")
-		w.WriteHeader(http.StatusBadRequest)
+	err := validateHandShakeReq(r, w)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
