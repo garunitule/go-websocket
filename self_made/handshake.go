@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	b64 "encoding/base64"
 	"fmt"
+	"net"
 	"net/http"
 )
 
@@ -29,7 +30,25 @@ func validateHandShakeReq(r *http.Request, w http.ResponseWriter) error {
 	return nil
 }
 
-func openHandShake(r *http.Request, buf *bufio.ReadWriter) *bufio.ReadWriter {
+func upgrade(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
+	hijacker, ok := w.(http.Hijacker)
+	if !ok {
+		err := fmt.Errorf("Not a hijacker")
+		fmt.Println(err)
+		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
+		return nil, nil, err
+	}
+
+	conn, buf, err := hijacker.Hijack()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
+		return nil, nil, err
+	}
+	return conn, buf, nil
+}
+
+func openHandShake(r *http.Request, buf *bufio.ReadWriter) {
 	key := r.Header.Get("Sec-WebSocket-Key")
 	h := sha1.New()
 	// TODO: 定数で良い理由を調査
@@ -43,5 +62,5 @@ func openHandShake(r *http.Request, buf *bufio.ReadWriter) *bufio.ReadWriter {
 		fmt.Fprintf(buf, "Sec-WebSocket-Protocol: %s\r\n", r.Header.Get("Sec-WebSocket-Protocol"))
 	}
 	fmt.Fprintf(buf, "\r\n")
-	return buf
+	buf.Flush()
 }

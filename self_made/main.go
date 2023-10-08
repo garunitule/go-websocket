@@ -31,22 +31,13 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hijacker, ok := w.(http.Hijacker)
-	if !ok {
-		fmt.Println("Not a hijacker")
-		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
-		return
-	}
-
-	conn, buf, err := hijacker.Hijack()
+	conn, buf, err := upgrade(w)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
 		return
 	}
 
-	buf = openHandShake(r, buf)
-	buf.Flush()
+	openHandShake(r, buf)
 	go handleConnection(conn)
 }
 
