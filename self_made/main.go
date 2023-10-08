@@ -12,7 +12,7 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	for {
-		strPayload, err := readRequestPayload(conn)
+		strPayload, err := ReadMessage(conn)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -24,20 +24,11 @@ func handleConnection(conn net.Conn) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%+v\n", r)
-	err := validateHandShakeReq(r, w)
+	conn, err := Upgrade(r, w)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	conn, buf, err := upgrade(w)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	openHandShake(r, buf)
 	go handleConnection(conn)
 }
 

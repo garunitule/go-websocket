@@ -6,7 +6,7 @@ import (
 	"net"
 )
 
-func readRequestPayload(conn net.Conn) (string, error) {
+func ReadMessage(conn net.Conn) (string, error) {
 	header := make([]byte, 2)
 	_, err := io.ReadFull(conn, header)
 	if err != nil {

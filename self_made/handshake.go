@@ -30,6 +30,24 @@ func validateHandShakeReq(r *http.Request, w http.ResponseWriter) error {
 	return nil
 }
 
+func Upgrade(r *http.Request, w http.ResponseWriter) (net.Conn, error) {
+	err := validateHandShakeReq(r, w)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	conn, buf, err := upgrade(w)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	openHandShake(r, buf)
+
+	return conn, nil
+}
+
 func upgrade(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
 	hijacker, ok := w.(http.Hijacker)
 	if !ok {
