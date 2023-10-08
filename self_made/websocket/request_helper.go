@@ -1,4 +1,4 @@
-package main
+package websocket
 
 import (
 	"fmt"
@@ -55,7 +55,6 @@ func ReadMessage(conn net.Conn) (string, error) {
 	}
 
 	strPayload := string(payload)
-
 	return strPayload, nil
 }
 
@@ -81,7 +80,6 @@ func extraPayloadLength(conn net.Conn, payloadLength int) (int, error) {
 	length := 0
 	for i := 0; i < n; i++ {
 		t := 8 * (n - i - 1)
-		fmt.Println(extraPayloadLengthBuffer[i], t, int(extraPayloadLengthBuffer[i])<<t)
 		length |= int(extraPayloadLengthBuffer[i]) << t
 	}
 	return length, nil
