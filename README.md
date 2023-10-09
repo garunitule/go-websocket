@@ -14,12 +14,7 @@ GoでWebSocketを理解するためのリポジトリ
 go run gorilla/main.go
 ```
 
-- 下記のcurlコマンドでコネクション確立
-```
-curl -vvv -i -N -H "Connection: keep-alive, Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Extensions: deflate-stream" -H "Sec-WebSocket-Key: WIY4slX50bnnSF1GaedKhg==" -H "Host: localhost:8080" -H "Origin:http://localhost:8080" http://localhost:8080
-```
-
-- TODO: WebSocketでメッセージやりとり
+- client.jsを実行し、メッセージの送受信を確認
 
 ## TODO
 - [] Sec-WebSocket-Extensionsヘッダの解析とhandlerへの反映
