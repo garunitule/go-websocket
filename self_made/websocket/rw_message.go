@@ -50,7 +50,6 @@ func ReadMessage(conn net.Conn) (string, error) {
 
 	if masked {
 		for i := 0; i < length; i++ {
-			// TODO: マスクしてる理由を調査する
 			payload[i] ^= maskKey[i%4]
 		}
 	}

@@ -69,7 +69,6 @@ func upgrade(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
 func openHandShake(r *http.Request, buf *bufio.ReadWriter) {
 	key := r.Header.Get("Sec-WebSocket-Key")
 	h := sha1.New()
-	// TODO: 定数で良い理由を調査
 	h.Write([]byte(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
 	accept := b64.StdEncoding.EncodeToString(h.Sum(nil))
 	fmt.Fprintf(buf, "HTTP/1.1 101 Switching Protocols\r\n")

@@ -1,5 +1,6 @@
 # go-websocket
 GoでWebSocketを理解するためのリポジトリ
+※学習のための実装であり、RFC6455の一部の内容しか実装されていません。
 
 ディレクトリ構成
 ```txt
@@ -15,6 +16,3 @@ go run gorilla/main.go
 ```
 
 - client.jsを実行し、メッセージの送受信を確認
-
-## TODO
-- [] Sec-WebSocket-Extensionsヘッダの解析とhandlerへの反映
